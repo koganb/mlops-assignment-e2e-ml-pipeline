@@ -66,6 +66,24 @@ runs/
 2. Production-style mode: deploy Airflow and MLflow locally on the VM using `docker compose`: https://airflow.apache.org/docs/apache-airflow/stable/howto/docker-compose/index.html#running-airflow-in-docker
 3. MLflow should be reachable from the VM and used by the DAG to log parameters, metrics, and artifact references.
 
+### Docker Compose
+
+Run the stack from the repo root:
+
+```bash
+docker compose up --build
+```
+
+This starts:
+- Airflow webserver on `http://localhost:8080`
+- Airflow scheduler
+- MLflow on `http://localhost:5000`
+
+The DAG reads `PROJECT_ROOT` from the environment, so the repository is mounted into the container at `/workspace/project`. Airflow logs and MLflow artifacts are persisted in named Docker volumes, while run outputs stay in the repo under `runs/`.
+Airflow itself is installed into the same project `.venv` as the DAG dependencies, so the scheduler, webserver, and task code share one Python environment.
+
+Default Airflow credentials are `admin` / `admin`; override `AIRFLOW_ADMIN_USERNAME` and `AIRFLOW_ADMIN_PASSWORD` in `.env` before starting the stack.
+
 Ultimately, the pipeline may look like: `run-mini-swe-agent` -> `swe-bench-eval` -> `log-artifacts-to-s3` -> `log-metrics-to-mlflow`.
 
 ## Suggested Implementation Path
